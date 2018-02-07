@@ -3,14 +3,14 @@ service: slslocal
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
-frameworkVersion: "=1.24.1"
+frameworkVersion: "=1.26.0"
 
 provider:
   name: aws
   runtime: python3.6
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  # defaults: stage=dev region=us-east-1
+  stage: dev
+  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -62,59 +62,49 @@ custom:
 #    variable1: value1
 
 # you can add packaging information here
-#package:
+package:
 #  include:
 #    - include-me.py
 #    - include-me-dir/**
-#  exclude:
-#    - exclude-me.py
-#    - exclude-me-dir/**
+ exclude:
+   - node_modules/**
 
 functions:
   hello:
     handler: handler.hello
 
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
+  gets3metadata:
+    handler: handler.gets3metadata
+    events:
+      - s3:
+          # Let SLS create the bucket, have to use its naming convention
+          bucket: chrisslslocal
+          event: s3:objectCreated:*
+          # rules:
+          #   - prefix: in/upload/image/
+          #   - suffix: .jpg
+
+
 #      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
 
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
 
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+Resources:
+  S3BucketChrisslslocal:        # name mangled from s3.bucket=chrisslslocal above
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: chris-slslocal
+    Gets3metadataLambdaPermissionChrisslslocalS3:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        FunctionName:
+          "Fn::GetAtt":
+            - Gets3metadataLambdaFunction
+            - Arn
+        Principal: "s3.amazonaws.com"
+        Action: "lambda:InvokeFunction"
+        SourceAccount:
+          Ref: AWS::AccountId
+        SourceArn: "arn:aws:s3:::chris-slslocal"
