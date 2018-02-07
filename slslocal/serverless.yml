@@ -1,26 +1,13 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
 service: slslocal
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
+frameworkVersion: "=1.24.1"
 
 provider:
   name: aws
   runtime: python3.6
-
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -40,6 +27,35 @@ provider:
 #          - - "arn:aws:s3:::"
 #            - "Ref" : "ServerlessDeploymentBucket"
 #            - "/*"
+
+plugins:
+  - serverless-localstack
+
+custom:
+  localstack:
+    host: http://localhost
+    endpoints:          # sorted by port
+      Kinesis:          http://localhost:4568
+      DynamoDB:         http://localhost:4570
+      Elasticsearch:    http://localhost:4571
+      S3:               http://localhost:4572
+      Lambda:           http://localhost:4574
+      SNS:              http://localhost:4575
+      SQS:              http://localhost:4576
+      ES:               http://localhost:4578
+      CloudFormation:   http://localhost:4581
+      # Starting mock API Gateway (http port 4567)...
+      # Starting mock DynamoDB Streams service (http port 4570)...
+      # Starting mock Firehose service (http port 4573)...
+      # Starting mock Redshift (http port 4577)...
+      # Starting mock SES (http port 4579)...
+      # Starting mock CloudWatch (http port 4582)...
+      # Starting mock SSM (http port 4583)...
+    # Only use localstack plugin for stages: local, dev
+    stages:
+      - local
+      - dev
+
 
 # you can define service wide environment variables here
 #  environment:
