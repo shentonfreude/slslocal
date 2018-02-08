@@ -34,6 +34,10 @@ plugins:
 custom:
   localstack:
     host: http://localhost
+    # Only use localstack plugin for stages: local
+    stages:
+      - local
+      #- dev
     endpoints:          # sorted by port
       Kinesis:          http://localhost:4568
       DynamoDB:         http://localhost:4570
@@ -51,10 +55,6 @@ custom:
       # Starting mock SES (http port 4579)...
       # Starting mock CloudWatch (http port 4582)...
       # Starting mock SSM (http port 4583)...
-    # Only use localstack plugin for stages: local, dev
-    stages:
-      - local
-      - dev
 
 
 # you can define service wide environment variables here
@@ -79,7 +79,7 @@ functions:
       - s3:
           # Let SLS create the bucket, have to use its naming convention
           bucket: chrisslslocal
-          event: s3:objectCreated:*
+          event: s3:ObjectCreated:*
           # rules:
           #   - prefix: in/upload/image/
           #   - suffix: .jpg
@@ -91,20 +91,22 @@ functions:
 #    environment:
 #      variable2: value2
 
-Resources:
-  S3BucketChrisslslocal:        # name mangled from s3.bucket=chrisslslocal above
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: chris-slslocal
-    Gets3metadataLambdaPermissionChrisslslocalS3:
-      Type: "AWS::Lambda::Permission"
-      Properties:
-        FunctionName:
-          "Fn::GetAtt":
-            - Gets3metadataLambdaFunction
-            - Arn
-        Principal: "s3.amazonaws.com"
-        Action: "lambda:InvokeFunction"
-        SourceAccount:
-          Ref: AWS::AccountId
-        SourceArn: "arn:aws:s3:::chris-slslocal"
+# Getting errors from localstack after deployment bucket created
+# so lets just comment them out for now
+# Resources:
+#   S3BucketChrisslslocal:        # name mangled from s3.bucket=chrisslslocal above
+#     Type: AWS::S3::Bucket
+#     Properties:
+#       BucketName: chris-slslocal
+#     Gets3metadataLambdaPermissionChrisslslocalS3:
+#       Type: "AWS::Lambda::Permission"
+#       Properties:
+#         FunctionName:
+#           "Fn::GetAtt":
+#             - Gets3metadataLambdaFunction
+#             - Arn
+#         Principal: "s3.amazonaws.com"
+#         Action: "lambda:InvokeFunction"
+#         SourceAccount:
+#           Ref: AWS::AccountId
+#         SourceArn: "arn:aws:s3:::chris-slslocal"
