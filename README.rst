@@ -36,7 +36,7 @@ There's now a web viewer on http://localhost:8080 and it shows (at
 this point in the execution) that the Serverless deployment bucket was
 created -- pretty cool.
 
-..image:: localstack-resources.png
+.. image:: localstack-resources.png
 
 UPDATE: docker threw errors I couldn't understand; trying to run
 locally threw error about not finding python2. Created separate dir
